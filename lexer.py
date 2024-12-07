@@ -40,11 +40,19 @@ class Lexer:
                 self.tokens.append(Token("LEFT_CURLY", current_character))
             elif current_character == "}":
                 self.tokens.append(Token("RIGHT_CURLY", current_character))
+            elif current_character == "[":
+                self.tokens.append(Token("LEFT_SQUARE_BRACE", current_character))
+            elif current_character == "]":
+                self.tokens.append(Token("RIGHT_SQUARE_BRACE", current_character))
             elif current_character == "+":
                 self.tokens.append(Token("OPERATOR", current_character))
             elif current_character in [" ", "\t", "\n"]:
                 pass
             elif current_character == "-":
+                self.tokens.append(Token("OPERATOR", current_character))
+            elif current_character == ",":
+                self.tokens.append(Token("OPERATOR", current_character))
+            elif current_character == ":":
                 self.tokens.append(Token("OPERATOR", current_character))
             elif current_character == ">":
                 if self.peek() == "=":
