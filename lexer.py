@@ -55,6 +55,14 @@ class Lexer:
                 break
             first_letter = self.advance()
 
+    def build_string(self):
+        lexeme = ""
+        current_character = self.advance()
+        while current_character != "\"":
+            lexeme += current_character
+            current_character = self.advance()
+
+        self.tokens.append(Token("STRING", lexeme))
 
     def lex(self):
         self.tokens = []
@@ -81,38 +89,38 @@ class Lexer:
 
             ### OPERATORS
             elif current_character == "+":
-                self.tokens.append(Token("OPERATOR", current_character))
+                self.tokens.append(Token("PLUS", current_character))
             elif current_character == "/":
-                self.tokens.append(Token("OPERATOR", current_character))
+                self.tokens.append(Token("DIVIDE", current_character))
             elif current_character == "*":
-                self.tokens.append(Token("OPERATOR", current_character))
+                self.tokens.append(Token("MULTIPLY", current_character))
             elif current_character == "%":
-                self.tokens.append(Token("OPERATOR", current_character))
+                self.tokens.append(Token("MODULUS", current_character))
             elif current_character in [" ", "\t", "\n"]:
                 pass
             elif current_character == "-":
-                self.tokens.append(Token("OPERATOR", current_character))
+                self.tokens.append(Token("MINUS", current_character))
             elif current_character == ">":
                 if self.peek() == "=":
                     self.advance()
-                    self.tokens.append(Token("OPERATOR", ">="))
+                    self.tokens.append(Token("GREATER_EQUAL", ">="))
                 else:
-                    self.tokens.append(Token("OPERATOR", ">"))
+                    self.tokens.append(Token("GREATER", ">"))
             elif current_character == "!":
                 if self.peek() == "=":
                     self.advance()
-                    self.tokens.append(Token("OPERATOR", "!="))
+                    self.tokens.append(Token("NOT_EQ", "!="))
                 else:
-                    self.tokens.append(Token("OPERATOR", "!"))
+                    self.tokens.append(Token("NOT", "!"))
             elif current_character == "<":
                 if self.peek() == "=":
                     self.advance()
-                    self.tokens.append(Token("OPERATOR", "<="))
+                    self.tokens.append(Token("LESSER_EQUAL", "<="))
                 else:
-                    self.tokens.append(Token("OPERATOR", "<"))
+                    self.tokens.append(Token("LESSER", "<"))
 
             elif current_character == ",":
-                self.tokens.append(Token("DELIMITER", current_character))
+                self.tokens.append(Token("COMMA", current_character))
             elif current_character == ":":
                 self.tokens.append(Token("COLON", current_character))
             elif current_character == ".":
@@ -127,5 +135,7 @@ class Lexer:
                 self.build_word(current_character)
             elif current_character in NUMBERS:
                 self.build_numbers(current_character)
+            elif current_character == "\"":
+                self.build_string()
 
 
