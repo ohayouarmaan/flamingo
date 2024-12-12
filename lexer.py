@@ -14,6 +14,7 @@ DELIMITERS
 DELIMITERS = [" ", "\t", "\n", ""]
 LETTERS = string.ascii_letters + "_"
 NUMBERS = [f"{x}" for x in range(0, 10)]
+KEYWORDS = ["print", "for", "while", "if", "else"]
 
 class Token:
     def __init__(self, _type, lexeme):
@@ -21,6 +22,9 @@ class Token:
         self.lexeme = lexeme
 
     def __repr__(self):
+        return f"{self.lexeme}"
+
+    def to_string(self):
         return f"{self.lexeme}"
 
 class Lexer:
@@ -42,7 +46,10 @@ class Lexer:
         while first_letter not in DELIMITERS and first_letter in LETTERS:
             lexeme += first_letter
             if self.peek() in DELIMITERS or self.peek() not in LETTERS:
-                self.tokens.append(Token("WORD", lexeme))
+                if lexeme in KEYWORDS:
+                    self.tokens.append(Token("KEYWORD", lexeme))
+                else:
+                    self.tokens.append(Token("WORD", lexeme))
                 break
             first_letter = self.advance()
 
@@ -112,6 +119,12 @@ class Lexer:
                     self.tokens.append(Token("NOT_EQ", "!="))
                 else:
                     self.tokens.append(Token("NOT", "!"))
+            elif current_character == "=":
+                if self.peek() == "=":
+                    self.advance()
+                    self.tokens.append(Token("EQ_EQ", "=="))
+                else:
+                    self.tokens.append(Token("EQ", "="))
             elif current_character == "<":
                 if self.peek() == "=":
                     self.advance()
@@ -123,6 +136,8 @@ class Lexer:
                 self.tokens.append(Token("COMMA", current_character))
             elif current_character == ":":
                 self.tokens.append(Token("COLON", current_character))
+            elif current_character == ";":
+                self.tokens.append(Token("SEMI_COLON", current_character))
             elif current_character == ".":
                 if self.peek() == ".":
                     self.advance()

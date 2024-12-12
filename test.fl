@@ -1,10 +1,1 @@
-@main() {
-  for i in 1..(9 + 7) {
-    if i % 2 >= 0 {
-      print "HELLO WORLD!";
-    }
-  }
-  
-
-  return 0;
-}
+print 6 * 6 + 5;
