@@ -13,6 +13,8 @@ primary        → NUMBER | STRING | "true" | "false" | "nil"
 
 PROGRAM        -> declaration* EOF ;
 declaration    -> statement ;
-statement      -> printStatement ;
+statement      -> exprStatement |
+                  printStatement ;
 printStatement -> KW:"print" expression ";" ;
+exprStatement  -> expression ";" ;
 ```

@@ -14,7 +14,7 @@ DELIMITERS
 DELIMITERS = [" ", "\t", "\n", ""]
 LETTERS = string.ascii_letters + "_"
 NUMBERS = [f"{x}" for x in range(0, 10)]
-KEYWORDS = ["print", "for", "while", "if", "else"]
+KEYWORDS = ["print", "for", "while", "if", "else", "var"]
 
 class Token:
     def __init__(self, _type, lexeme):
@@ -49,9 +49,13 @@ class Lexer:
                 if lexeme in KEYWORDS:
                     self.tokens.append(Token("KEYWORD", lexeme))
                 else:
+                    if lexeme == "nil":
+                        self.tokens.append(Token("NIL", lexeme))
                     self.tokens.append(Token("WORD", lexeme))
                 break
+
             first_letter = self.advance()
+
 
     def build_numbers(self, first_letter: str):
         lexeme = ""

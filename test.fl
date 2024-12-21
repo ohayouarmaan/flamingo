@@ -1,1 +1,4 @@
-print 6 * 6 + 5;
+var x = 4;
+var y = 3;
+var z = 54;
+print x + y * z;

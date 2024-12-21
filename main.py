@@ -11,7 +11,6 @@ l.lex()
 p = parser.Parser(l.tokens)
 
 e = p.parse()
-print(e, l.tokens)
 inter = interpreter.Interpreter(e)
 
 inter.interpret()
