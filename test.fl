@@ -6,6 +6,7 @@ var x = {
 var y = 3;
 var z = {
   y = 45;
+  print x;
   6;
 };
 print x + y * z;
