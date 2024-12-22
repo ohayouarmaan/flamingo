@@ -290,7 +290,7 @@ class Parser:
         return self.create_binary_expression(self.factor, ["MINUS", "PLUS"])
 
     def factor(self):
-        return self.create_binary_expression(self.unary, ["DIVIDE", "MULTIPLY"])
+        return self.create_binary_expression(self.unary, ["DIVIDE", "MULTIPLY", "MODULUS"])
 
     def unary(self):
         if self.match_tokens(["NOT", "MINUS"]):

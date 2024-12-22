@@ -68,6 +68,8 @@ class Interpreter:
         if expr.operator.type == "PLUS":
             lhs = self.eval_expr(expr.left)
             rhs = self.eval_expr(expr.right)
+            if isinstance(lhs, str) or isinstance(rhs, str):
+                return str(lhs) + str(rhs)
             return lhs + rhs
 
         elif expr.operator.type == "MINUS":
@@ -111,6 +113,13 @@ class Interpreter:
             if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
                 raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
             return lhs > rhs
+
+        elif expr.operator.type == "MODULUS":
+            lhs = self.eval_expr(expr.left)
+            rhs = self.eval_expr(expr.right)
+            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
+                raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
+            return lhs % rhs
 
         elif expr.operator.type == "LESSER":
             lhs = self.eval_expr(expr.left)

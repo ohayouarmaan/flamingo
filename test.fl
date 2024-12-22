@@ -22,6 +22,8 @@ var z = if 0 {
 };
 
 for var i = 0, i < 9, i = i + 1 {
-  print i * 8;
+  if i % 2 == 0 {
+    print i + "> i % 2 == 0 and i * 8 : " + i * 8;
+  }
 }
 
