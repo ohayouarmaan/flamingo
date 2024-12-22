@@ -1,7 +1,8 @@
 # Grammar for mark
 
 ```
-expression     → equality ;
+expression     → equality | assignment;
+assignment     → identifier "=" expression ; 
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ; // factor -> unary -> primary -> number + factor -> ...

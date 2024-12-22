@@ -63,6 +63,33 @@ class IfExpression:
     def to_string(self):
         return f"IF: {self.condition} ELSE: {self.else_expression}"
 
+class VarDeclarationExpression:
+    def __init__(self, name, expr):
+        self.name = name
+        self.expr = expr
+        self.expr_type = "VAR_DECLARATION_EXPRESSION"
+
+    def __repr__(self):
+        return f"{self.name} = {self.expr}"
+
+    def to_string(self):
+        return f"{self.name} = {self.expr}"
+
+
+class VarUpdateExpression:
+    def __init__(self, name, expr):
+        self.name = name
+        self.expr = expr
+        self.expr_type = "VAR_UPDATE_EXPRESSION"
+
+    def __repr__(self):
+        return f"{self.name} = {self.expr}"
+
+    def to_string(self):
+        return f"{self.name} = {self.expr}"
+
+
+
 class Program:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -113,6 +140,20 @@ class ExpressionStatement:
 
     def to_string(self):
         return f"{self.expr}"
+
+class ForStatement:
+    def __init__(self, initializer, conditional, incrementor, block):
+        self.initializer = initializer
+        self.conditional = conditional
+        self.incrementor = incrementor
+        self.statement_type = "FOR_LOOP_STATEMENT"
+        self.block = block
+
+    def __repr__(self):
+        return f"FOR: {self.conditional}"
+
+    def to_string(self):
+        return f"FOR: {self.conditional}"
 
 class Parser:
     def __init__(self, tokens):
@@ -167,6 +208,15 @@ class Parser:
                     if self.match_tokens(["SEMI_COLON"]):
                         pass
                     return ExpressionStatement(expr)
+                case "for":
+                    self.consume("KEYWORD")
+                    initializer = self.expression()
+                    self.consume("COMMA")
+                    condition = self.expression()
+                    self.consume("COMMA")
+                    incrementor = self.expression()
+                    loop_block = self.expression()
+                    return ForStatement(initializer, condition, incrementor, loop_block)
 
         elif self.tokens[self.current_index].type == "WORD":
             name = self.tokens[self.current_index].lexeme
@@ -214,6 +264,19 @@ class Parser:
                             self.consume("KEYWORD")
                             else_expr = self.expression()
                 return IfExpression(expr, block_expr, else_expr)
+            elif kw.lexeme == "var":
+                if self.consume("WORD"):
+                    name = self.tokens[self.current_index - 1].lexeme
+                    self.consume("EQ")
+                    expr = self.expression()
+                    return VarDeclarationExpression(name, expr)
+        elif self.match_tokens(["WORD"]):
+            ident = self.tokens[self.current_index - 1].lexeme
+            if self.match_tokens(["EQ"]):
+                expr = self.expression()
+                return VarUpdateExpression(ident, expr)
+            self.current_index -= 1
+            return self.equality()
 
         return self.equality()
 

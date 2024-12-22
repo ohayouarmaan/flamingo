@@ -27,6 +27,16 @@ class Interpreter:
                 self.current_storage.update_value(value, statement.name)
                 return None
 
+            case "FOR_LOOP_STATEMENT":
+                block_storage = storage.Storage(self.current_storage)
+                self.current_storage = block_storage
+                value = self.eval_expr(statement.initializer)
+                while self.eval_expr(statement.conditional):
+                    self.eval_expr(statement.block)
+                    self.eval_expr(statement.incrementor)
+                self.current_storage = self.current_storage.parent
+                return None
+
             case "EXPRESSION_STATEMENT":
                 value = self.eval_expr(statement.expr)
                 return value
@@ -48,6 +58,12 @@ class Interpreter:
             case "CONDITIONAL":
                 return self.visit_conditional(expr)
 
+            case "VAR_UPDATE_EXPRESSION":
+                return self.visit_var_update(expr)
+
+            case "VAR_DECLARATION_EXPRESSION":
+                return self.visit_var_declaration(expr)
+
     def visit_binary(self, expr):
         if expr.operator.type == "PLUS":
             lhs = self.eval_expr(expr.left)
@@ -57,30 +73,77 @@ class Interpreter:
         elif expr.operator.type == "MINUS":
             lhs = self.eval_expr(expr.left)
             rhs = self.eval_expr(expr.right)
-            if not isinstance(lhs, float) or not isinstance(rhs, float):
+            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
                 raise Exception("Expected LHS and RHS of a Subtraction Expression to be a number.")
             return lhs - rhs
 
         elif expr.operator.type == "MULTIPLY":
             lhs = self.eval_expr(expr.left)
             rhs = self.eval_expr(expr.right)
-            if not isinstance(lhs, float) or not isinstance(rhs, float):
+            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
                 raise Exception("Expected LHS and RHS of a Multiply Expression to be a number.")
             return lhs * rhs
 
         elif expr.operator.type == "DIVIDE":
             lhs = self.eval_expr(expr.left)
             rhs = self.eval_expr(expr.right)
-            if not isinstance(lhs, float) or not isinstance(rhs, float):
+            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
                 raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
             return lhs / rhs
+
+        elif expr.operator.type == "GREATER_EQUAL":
+            lhs = self.eval_expr(expr.left)
+            rhs = self.eval_expr(expr.right)
+            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
+                raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
+            return lhs >= rhs
+
+        elif expr.operator.type == "LESSER_EQUAL":
+            lhs = self.eval_expr(expr.left)
+            rhs = self.eval_expr(expr.right)
+            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
+                raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
+            return lhs <= rhs
+
+        elif expr.operator.type == "GREATER":
+            lhs = self.eval_expr(expr.left)
+            rhs = self.eval_expr(expr.right)
+            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
+                raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
+            return lhs > rhs
+
+        elif expr.operator.type == "LESSER":
+            lhs = self.eval_expr(expr.left)
+            rhs = self.eval_expr(expr.right)
+            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
+                raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
+            return lhs < rhs
+
+        elif expr.operator.type == "EQ_EQ":
+            lhs = self.eval_expr(expr.left)
+            rhs = self.eval_expr(expr.right)
+            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
+                raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
+            return lhs == rhs
+
+        elif expr.operator.type == "NOT_EQ":
+            lhs = self.eval_expr(expr.left)
+            rhs = self.eval_expr(expr.right)
+            return lhs != rhs
+
 
     def visit_unary(self, expr):
         pass
 
     def visit_literal(self, expr):
         if expr.type == "NUMBER":
-            return float(expr.value.lexeme)
+            try:
+                return int(expr.value.lexeme)
+            except ValueError:
+                return float(expr.value.lexeme)
+            except:
+                raise Exception("Expected a Number")
+            
         elif expr.type == "STRING":
             return expr.value.lexeme
         elif expr.type == "NIL":
@@ -107,3 +170,13 @@ class Interpreter:
             if expr.else_expression:
                 result = self.eval_expr(expr.else_expression)
         return result
+    
+    def visit_var_declaration(self, expr):
+        value = self.eval_expr(expr.expr)
+        self.current_storage.add_value(value, expr.name)
+        return None
+
+    def visit_var_update(self, expr):
+        value = self.eval_expr(expr.expr)
+        self.current_storage.update_value(value, expr.name)
+        return value

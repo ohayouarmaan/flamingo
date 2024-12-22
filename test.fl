@@ -8,7 +8,11 @@ var y = 3;
 
 if 1 {
   print "Hello :)";
-};
+} else if 0 {
+  print "should not be printed";
+} else {
+  print "this will get printed if any other does not pass";
+}
 
 var z = if 0 {
   y = 45;
@@ -17,4 +21,7 @@ var z = if 0 {
   8;
 };
 
-print z;
+for var i = 0, i < 9, i = i + 1 {
+  print i * 8;
+}
+
