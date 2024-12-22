@@ -45,6 +45,9 @@ class Interpreter:
             case "BLOCK":
                 return self.visit_block(expr)
 
+            case "CONDITIONAL":
+                return self.visit_conditional(expr)
+
     def visit_binary(self, expr):
         if expr.operator.type == "PLUS":
             lhs = self.eval_expr(expr.left)
@@ -93,3 +96,14 @@ class Interpreter:
             last_statement = self.eval_statement(stmt)
         self.current_storage = self.current_storage.parent
         return last_statement
+
+    def visit_conditional(self, expr):
+        condition = expr.condition
+        if_block = expr.if_block
+        result = None
+        if self.eval_expr(condition):
+            result = self.eval_expr(if_block)
+        else:
+            if expr.else_expression:
+                result = self.eval_expr(expr.else_expression)
+        return result

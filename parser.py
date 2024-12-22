@@ -44,10 +44,10 @@ class BlockExpression:
         self.expr_type = "BLOCK"
 
     def __repr__(self):
-        return f"BLOCK EXPRESSION: {self.last_value}"
+        return f"BLOCK EXPRESSION: {self.statements[len(self.statements) - 1]}"
 
     def to_string(self):
-        return f"BLOCK EXPRESSION: {self.last_value}"
+        return f"BLOCK EXPRESSION: {self.statements[len(self.statements) - 1]}"
 
 
 class IfExpression:
@@ -55,6 +55,7 @@ class IfExpression:
         self.condition = condition
         self.if_block = if_block
         self.else_expression = else_expression
+        self.expr_type = "CONDITIONAL"
 
     def __repr__(self):
         return f"IF: {self.condition} ELSE: {self.else_expression}"
@@ -162,6 +163,15 @@ class Parser:
                         expr = self.expression()
                     self.consume("SEMI_COLON")
                     return VarDeclarationStatement(name, expr)
+                case "if":
+                    self.consume("KEYWORD")
+                    expr = self.expr()
+                    block_expr = None
+                    if self.tokens[self.current_index].type == "LEFT_CURLY":
+                        block_expr = self.expr()
+
+                    return IfExpression(expr, block_expr, None)
+
         elif self.tokens[self.current_index].type == "WORD":
             name = self.tokens[self.current_index].lexeme
             self.consume("WORD")
@@ -195,6 +205,19 @@ class Parser:
             while not self.match_tokens(["RIGHT_CURLY"]):
                 statements.append(self.statement())
             return BlockExpression(statements)
+        elif self.match_tokens(["KEYWORD"]):
+            kw = self.tokens[self.current_index - 1]
+            if kw.lexeme == "if":
+                expr = self.expression()
+                block_expr = None
+                else_expr = None
+                if self.tokens[self.current_index].type == "LEFT_CURLY":
+                    block_expr = self.expression()
+                    if self.tokens[self.current_index].type == "KEYWORD":
+                        if self.tokens[self.current_index].lexeme == "else":
+                            self.consume("KEYWORD")
+                            else_expr = self.expression()
+                return IfExpression(expr, block_expr, else_expr)
 
         return self.equality()
 

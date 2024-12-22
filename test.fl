@@ -3,10 +3,14 @@ var x = {
   var t = 4;
   5;
 };
+
 var y = 3;
-var z = {
+
+var z = if 0 {
   y = 45;
-  print x;
-  6;
+  7 + 9;
+} else {
+  8;
 };
-print x + y * z;
+
+print z;
