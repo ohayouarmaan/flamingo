@@ -37,6 +37,31 @@ class LiteralExpression:
     def to_string(self):
         return f"{self.value.to_string()}"
 
+
+class BlockExpression:
+    def __init__(self, statements):
+        self.statements = statements
+        self.expr_type = "BLOCK"
+
+    def __repr__(self):
+        return f"BLOCK EXPRESSION: {self.last_value}"
+
+    def to_string(self):
+        return f"BLOCK EXPRESSION: {self.last_value}"
+
+
+class IfExpression:
+    def __init__(self, condition, if_block, else_expression):
+        self.condition = condition
+        self.if_block = if_block
+        self.else_expression = else_expression
+
+    def __repr__(self):
+        return f"IF: {self.condition} ELSE: {self.else_expression}"
+
+    def to_string(self):
+        return f"IF: {self.condition} ELSE: {self.else_expression}"
+
 class Program:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -64,6 +89,30 @@ class VarDeclarationStatement:
 
     def to_string(self):
         return f"{self.name} = {self.expr}"
+
+class VarUpdateStatement:
+    def __init__(self, name, expr):
+        self.name = name
+        self.expr = expr
+        self.statement_type = "VAR_UPDATE_STATEMENT"
+
+    def __repr__(self):
+        return f"{self.name} = {self.expr}"
+
+    def to_string(self):
+        return f"{self.name} = {self.expr}"
+
+
+class ExpressionStatement:
+    def __init__(self, expr):
+        self.expr = expr
+        self.statement_type = "EXPRESSION_STATEMENT"
+
+    def __repr__(self):
+        return f"{self.expr}"
+
+    def to_string(self):
+        return f"{self.expr}"
 
 class Parser:
     def __init__(self, tokens):
@@ -113,6 +162,22 @@ class Parser:
                         expr = self.expression()
                     self.consume("SEMI_COLON")
                     return VarDeclarationStatement(name, expr)
+        elif self.tokens[self.current_index].type == "WORD":
+            name = self.tokens[self.current_index].lexeme
+            self.consume("WORD")
+            if self.match_tokens(["EQ"]):
+                expr = self.expression()
+                self.consume("SEMI_COLON")
+                return VarUpdateStatement(name, expr)
+            else:
+                expr = self.expression()
+                self.consume("SEMI_COLON")
+                return ExpressionStatement(expr)
+
+        else:
+            expr = self.expression()
+            self.consume("SEMI_COLON")
+            return ExpressionStatement(expr)
 
 
     def create_binary_expression(self, precedent_fn, match_tokens):
@@ -125,6 +190,12 @@ class Parser:
 
 
     def expression(self):
+        if self.match_tokens(["LEFT_CURLY"]):
+            statements = []
+            while not self.match_tokens(["RIGHT_CURLY"]):
+                statements.append(self.statement())
+            return BlockExpression(statements)
+
         return self.equality()
 
     def equality(self):

@@ -17,4 +17,6 @@ statement      -> exprStatement |
                   printStatement ;
 printStatement -> KW:"print" expression ";" ;
 exprStatement  -> expression ";" ;
+ifExpression    -> 'if' expression <block> (else statement)? ;
+block          -> '{' (statement ';')* '}'
 ```

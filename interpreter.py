@@ -3,7 +3,8 @@ import storage
 class Interpreter:
     def __init__(self, program):
         self.program = program 
-        self.global_storage = storage.GlobalStorage(None)
+        self.global_storage = storage.Storage(None)
+        self.current_storage = self.global_storage
 
     def interpret(self):
         for statement in self.program:
@@ -14,12 +15,21 @@ class Interpreter:
             case "PRINT_STATEMENT":
                 value = self.eval_expr(statement.expr)
                 print(value)
+                return None
 
             case "VAR_DECLARATION_STATEMENT":
                 value = self.eval_expr(statement.expr)
-                self.global_storage.add_value(value, statement.name)
+                self.current_storage.add_value(value, statement.name)
+                return None
 
+            case "VAR_UPDATE_STATEMENT":
+                value = self.eval_expr(statement.expr)
+                self.current_storage.update_value(value, statement.name)
+                return None
 
+            case "EXPRESSION_STATEMENT":
+                value = self.eval_expr(statement.expr)
+                return value
 
     def eval_expr(self, expr):
         match expr.expr_type:
@@ -31,6 +41,9 @@ class Interpreter:
 
             case "LITERAL":
                 return self.visit_literal(expr)
+
+            case "BLOCK":
+                return self.visit_block(expr)
 
     def visit_binary(self, expr):
         if expr.operator.type == "PLUS":
@@ -70,5 +83,13 @@ class Interpreter:
         elif expr.type == "NIL":
             return None
         elif expr.type == "WORD":
-            return self.global_storage.get_value(expr.value.lexeme)
+            return self.current_storage.get_value(expr.value.lexeme)
 
+    def visit_block(self, expr):
+        last_statement = None
+        block_storage = storage.Storage(self.current_storage)
+        self.current_storage = block_storage
+        for stmt in expr.statements:
+            last_statement = self.eval_statement(stmt)
+        self.current_storage = self.current_storage.parent
+        return last_statement

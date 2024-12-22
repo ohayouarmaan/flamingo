@@ -1,4 +1,11 @@
-var x = 4;
+var x = {
+  print "Hello, World!";
+  var t = 4;
+  5;
+};
 var y = 3;
-var z = 54;
+var z = {
+  y = 45;
+  6;
+};
 print x + y * z;
