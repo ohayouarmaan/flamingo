@@ -7,8 +7,8 @@ class Interpreter:
         self.current_storage = self.global_storage
 
     def interpret(self):
-        for statement in self.program:
-            self.eval_statement(statement)
+        for i in range(len(self.program)):
+            self.eval_statement(self.program[i])
 
     def eval_statement(self, statement):
         match statement.statement_type:

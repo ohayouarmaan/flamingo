@@ -66,7 +66,6 @@ class IfExpression:
 class Program:
     def __init__(self, tokens):
         self.tokens = tokens
-        pass
 
 class PrintStatement:
     def __init__(self, expr):
@@ -164,13 +163,10 @@ class Parser:
                     self.consume("SEMI_COLON")
                     return VarDeclarationStatement(name, expr)
                 case "if":
-                    self.consume("KEYWORD")
-                    expr = self.expr()
-                    block_expr = None
-                    if self.tokens[self.current_index].type == "LEFT_CURLY":
-                        block_expr = self.expr()
-
-                    return IfExpression(expr, block_expr, None)
+                    expr = self.expression()
+                    if self.match_tokens(["SEMI_COLON"]):
+                        pass
+                    return ExpressionStatement(expr)
 
         elif self.tokens[self.current_index].type == "WORD":
             name = self.tokens[self.current_index].lexeme
