@@ -14,6 +14,7 @@ DELIMITERS
 DELIMITERS = [" ", "\t", "\n", ""]
 LETTERS = string.ascii_letters + "_"
 NUMBERS = [f"{x}" for x in range(0, 10)]
+NUMBERS.append(".")
 KEYWORDS = ["print", "for", "while", "if", "else", "var"]
 
 class Token:
@@ -59,9 +60,12 @@ class Lexer:
 
     def build_numbers(self, first_letter: str):
         lexeme = ""
+        dot_count = 0
         while first_letter not in DELIMITERS and first_letter in NUMBERS:
             lexeme += first_letter
-            if self.peek() in DELIMITERS or self.peek() not in NUMBERS:
+            if first_letter == ".":
+                dot_count += 1
+            if self.peek() in DELIMITERS or self.peek() not in NUMBERS or dot_count > 1:
                 self.tokens.append(Token("NUMBER", lexeme))
                 break
             first_letter = self.advance()
