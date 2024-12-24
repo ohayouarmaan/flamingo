@@ -127,12 +127,14 @@ class Lexer:
                     self.tokens.append(Token("NOT_EQ", "!="))
                 else:
                     self.tokens.append(Token("NOT", "!"))
+
             elif current_character == "=":
                 if self.peek() == "=":
                     self.advance()
                     self.tokens.append(Token("EQ_EQ", "=="))
                 else:
                     self.tokens.append(Token("EQ", "="))
+
             elif current_character == "<":
                 if self.peek() == "=":
                     self.advance()
