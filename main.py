@@ -8,6 +8,7 @@ with open("./test.fl", "r") as f:
     l = lexer.Lexer(f.read())
 
 l.lex()
+print(l.tokens)
 p = parser.Parser(l.tokens)
 
 e = p.parse()
