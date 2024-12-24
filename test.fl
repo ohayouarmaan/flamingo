@@ -2,5 +2,4 @@ var x = time();
 print "hello";
 var y = time();
 
-var total_time = y - x;
-print "Total time take to print hello: " + total_time;
+print "Total time took to print hello: " + (y - x);
