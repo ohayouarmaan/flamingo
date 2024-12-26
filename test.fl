@@ -1,5 +1,10 @@
-var x = time();
-print "hello";
-var y = time();
+@main(str, another_function) {
+  print str;
+  another_function();
+}
 
-print "Total time took to print hello: " + (y - x);
+@another_function() {
+  4;
+}
+
+print main("hello world", another_function);
