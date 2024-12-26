@@ -1,6 +1,7 @@
 import storage
 from callable import Callable 
 from standard.time import Time
+from standard.user_defined import UserDefined
 
 class Interpreter:
     def __init__(self, program):
@@ -43,6 +44,11 @@ class Interpreter:
             case "EXPRESSION_STATEMENT":
                 value = self.eval_expr(statement.expr)
                 return value
+
+            case "FUNCTION_DECLARATION_STATEMENT":
+                self.current_storage.add_value(UserDefined(statement.arguments, statement.function_block), statement.name)
+                return None
+
 
     def eval_expr(self, expr):
         match expr.expr_type:

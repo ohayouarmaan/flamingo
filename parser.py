@@ -25,6 +25,7 @@ class UnaryExpression:
     def to_string(self):
         return f"UNA({self.operator.to_string()} {self.value.to_string()})"
 
+
 class LiteralExpression:
     def __init__(self, _type, value):
         self.type = _type
@@ -165,6 +166,19 @@ class ForStatement:
     def to_string(self):
         return f"FOR: {self.conditional}"
 
+class FunctionDeclarationStatement:
+    def __init__(self, name, arguments, function_block):
+        self.arguments = arguments
+        self.name = name
+        self.function_block = function_block
+        self.statement_type = "FUNCTION_DECLARATION_STATEMENT"
+
+    def __repr__(self):
+        return f"@{self.name}({','.join(self.arguments)})"
+
+    def to_string(self):
+        return f"@{self.name}({','.join(self.arguments)})"
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -227,6 +241,23 @@ class Parser:
                     incrementor = self.expression()
                     loop_block = self.expression()
                     return ForStatement(initializer, condition, incrementor, loop_block)
+                
+        
+        elif self.tokens[self.current_index].type == "FUNCTION_INITIALIZER":
+            self.consume("FUNCTION_INITIALIZER")
+            function_name = self.tokens[self.current_index].lexeme
+            self.consume("WORD")
+            self.consume("LEFT_BRACKET")
+            arguments = []
+            while not self.match_tokens("RIGHT_BRACKET"):
+                if self.match_tokens("WORD"):
+                    arguments.append(self.tokens[self.current_index - 1].lexeme)
+
+                if self.match_tokens("COMMA"):
+                    pass
+
+            block = self.expression()
+            return FunctionDeclarationStatement(function_name, arguments, block)
 
         elif self.tokens[self.current_index].type == "WORD":
             name = self.tokens[self.current_index].lexeme
