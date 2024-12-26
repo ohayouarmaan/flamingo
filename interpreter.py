@@ -208,5 +208,13 @@ class Interpreter:
 
     def visit_call_expression(self, expr):
         value = self.eval_expr(expr.name)
-        return value.call(expr.arguments)
+        if len(expr.arguments) != value.arity:
+            raise Exception(f"Expected {value.arity} arguments got {len(expr.arguments)}. in the {expr.name} function")
+
+        arguments = []
+        for arg in expr.arguments:
+            arguments.append(self.eval_expr(arg))
+
+        return value.call(self, arguments)
+    
 

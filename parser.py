@@ -364,4 +364,8 @@ class Parser:
             return LiteralExpression("NIL", self.tokens[self.current_index - 1])
         elif self.match_tokens("WORD"):
             return LiteralExpression("WORD", self.tokens[self.current_index - 1])
+        elif self.match_tokens("LEFT_BRACKET"):
+            expr = self.expression()
+            self.consume("RIGHT_BRACKET")
+            return expr
 
