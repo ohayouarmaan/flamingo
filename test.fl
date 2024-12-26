@@ -1,7 +1,5 @@
-var x = if 3 > 2 {
-  5;
-} else {
-  7;
-};
-var y = 3.7;
-print x + y;
+var x = time();
+print "hello";
+var y = time();
+
+print "Total time took to print hello: " + (y - x);

@@ -1,16 +1,17 @@
-# Grammar for mark
+# Grammar for flamingo
 
 ```
 expression     → equality | assignment;
 assignment     → identifier "=" expression ; 
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-term           → factor ( ( "-" | "+" ) factor )* ; // factor -> unary -> primary -> number + factor -> ...
+term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary
-               | primary ;
+               | call ;
+call           → primary ( "(" arguments? ")" )* ;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
-               | "(" expression ")" ;
+               | "(" expression ")" | identifier ;
 
 PROGRAM        -> declaration* EOF ;
 declaration    -> statement ;
@@ -20,4 +21,6 @@ printStatement -> KW:"print" expression ";" ;
 exprStatement  -> expression ";" ;
 ifExpression    -> 'if' expression <block> (else statement)? ;
 block          -> '{' (statement ';')* '}'
+
+arguments       -> expression ( "," expression )* ;
 ```

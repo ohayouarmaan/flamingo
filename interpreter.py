@@ -1,9 +1,12 @@
 import storage
+from callable import Callable 
+from standard.time import Time
 
 class Interpreter:
     def __init__(self, program):
         self.program = program 
         self.global_storage = storage.Storage(None)
+        self.global_storage.add_value(Time(), "time")
         self.current_storage = self.global_storage
 
     def interpret(self):
@@ -63,6 +66,9 @@ class Interpreter:
 
             case "VAR_DECLARATION_EXPRESSION":
                 return self.visit_var_declaration(expr)
+
+            case "CALL_EXPRESSION":
+                return self.visit_call_expression(expr)
 
     def visit_binary(self, expr):
         if expr.operator.type == "PLUS":
@@ -158,7 +164,11 @@ class Interpreter:
         elif expr.type == "NIL":
             return None
         elif expr.type == "WORD":
-            return self.current_storage.get_value(expr.value.lexeme)
+            value = self.current_storage.get_value(expr.value.lexeme)
+            if isinstance(value, Callable):
+                return value
+            else:
+                return value
 
     def visit_block(self, expr):
         last_statement = None
@@ -189,4 +199,16 @@ class Interpreter:
         value = self.eval_expr(expr.expr)
         self.current_storage.update_value(value, expr.name)
         return value
+
+    def visit_call_expression(self, expr):
+        value = self.eval_expr(expr.name)
+        if len(expr.arguments) != value.arity:
+            raise Exception(f"Expected {value.arity} arguments got {len(expr.arguments)}. in the {expr.name} function")
+
+        arguments = []
+        for arg in expr.arguments:
+            arguments.append(self.eval_expr(arg))
+
+        return value.call(self, arguments)
+    
 

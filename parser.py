@@ -88,7 +88,17 @@ class VarUpdateExpression:
     def to_string(self):
         return f"{self.name} = {self.expr}"
 
+class CallExpression:
+    def __init__(self, name, arguments):
+        self.name = name
+        self.arguments = arguments
+        self.expr_type = "CALL_EXPRESSION"
 
+    def __repr__(self):
+        return f"{self.name}({','.join(map(lambda x: x.to_string(), self.arguments))})"
+
+    def to_string(self):
+        return f"{self.name}({','.join(map(lambda x: x.to_string(), self.arguments))})"
 
 class Program:
     def __init__(self, tokens):
@@ -226,6 +236,7 @@ class Parser:
                 self.consume("SEMI_COLON")
                 return VarUpdateStatement(name, expr)
             else:
+                self.current_index -= 1
                 expr = self.expression()
                 self.consume("SEMI_COLON")
                 return ExpressionStatement(expr)
@@ -297,8 +308,21 @@ class Parser:
             unary_expr = self.unary()
             return UnaryExpression(self.tokens[self.current_index - 1], unary_expr)
         else:
-            return self.primary()
+            return self.call()
 
+
+    def call(self):
+        primary = self.primary()
+        while self.match_tokens("LEFT_BRACKET"):
+            arguments = []
+            while not self.match_tokens("RIGHT_BRACKET"):
+                current_argument = self.expression()
+                arguments.append(current_argument)
+                if self.match_tokens("COMMA"):
+                    continue
+
+            primary = CallExpression(primary, arguments)
+        return primary
 
     def primary(self):
         if self.match_tokens("NUMBER"):
@@ -309,4 +333,8 @@ class Parser:
             return LiteralExpression("NIL", self.tokens[self.current_index - 1])
         elif self.match_tokens("WORD"):
             return LiteralExpression("WORD", self.tokens[self.current_index - 1])
+        elif self.match_tokens("LEFT_BRACKET"):
+            expr = self.expression()
+            self.consume("RIGHT_BRACKET")
+            return expr
 
