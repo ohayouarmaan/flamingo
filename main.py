@@ -5,7 +5,9 @@ import interpreter
 l = None
 
 with open("./test.fl", "r") as f:
-    l = lexer.Lexer(f.read())
+    content = f.read()
+    l = lexer.Lexer(content)
+
 
 l.lex()
 p = parser.Parser(l.tokens)

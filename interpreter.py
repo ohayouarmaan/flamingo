@@ -1,7 +1,7 @@
 import storage
-from callable import Callable 
+from callable import Callable
 from standard.time import Time
-from standard.user_defined import UserDefined
+from standard.user_defined import UserDefined, ReturnException
 
 class Interpreter:
     def __init__(self, program):
@@ -48,6 +48,8 @@ class Interpreter:
             case "FUNCTION_DECLARATION_STATEMENT":
                 self.current_storage.add_value(UserDefined(statement.arguments, statement.function_block), statement.name)
                 return None
+            case "RETURN_STATEMENT":
+                raise ReturnException(self.eval_expr(statement.expr))
 
 
     def eval_expr(self, expr):
@@ -154,7 +156,10 @@ class Interpreter:
 
 
     def visit_unary(self, expr):
-        pass
+        if expr.operator.lexeme == "!":
+            return not self.eval_expr(expr.value)
+        elif expr.operator.lexeme == "-":
+            return -self.eval_expr(expr.value)
 
     def visit_literal(self, expr):
         if expr.type == "NUMBER":
@@ -181,7 +186,10 @@ class Interpreter:
         block_storage = storage.Storage(self.current_storage)
         self.current_storage = block_storage
         for stmt in expr.statements:
-            last_statement = self.eval_statement(stmt)
+            try:
+                last_statement = self.eval_statement(stmt)
+            except ReturnException as e:
+                raise e
         self.current_storage = self.current_storage.parent
         return last_statement
 

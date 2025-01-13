@@ -17,7 +17,8 @@ PROGRAM        -> declaration* EOF ;
 declaration    -> statement ;
 statement      -> exprStatement |
                   printStatement ;
-printStatement -> KW:"print" expression ";" ;
+printStatement -> "print" expression ";" ;
+returnStatement -> "return" expression ";" ;
 exprStatement  -> expression ";" ;
 ifExpression    -> 'if' expression <block> (else statement)? ;
 block          -> '{' (statement ';')* '}'

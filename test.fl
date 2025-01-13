@@ -1,10 +1,10 @@
-@main(str, another_function) {
-  print str;
-  another_function();
+var i = 4;
+
+@function(something) {
+  print something;
+  return -5;
 }
 
-@another_function() {
-  4;
+for var j = 0, j < 4, j = (j + 2) {
+  print function(j);
 }
-
-print main("hello world", another_function);
