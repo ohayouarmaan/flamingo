@@ -13,6 +13,7 @@
 ---
 Sprint (15th jan 2025):
 * Function support [ x ]
+* Return Statements Support [ x ]
 * Runner [ x ]
 * REPL [  ]
 * Struct support [  ]
