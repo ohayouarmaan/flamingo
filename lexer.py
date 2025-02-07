@@ -15,7 +15,7 @@ DELIMITERS = [" ", "\t", "\n", ""]
 LETTERS = string.ascii_letters + "_"
 NUMBERS = [f"{x}" for x in range(0, 10)]
 NUMBERS.append(".")
-KEYWORDS = ["print", "for", "while", "if", "else", "var"]
+KEYWORDS = ["print", "for", "while", "if", "else", "var", "return"]
 
 class Token:
     def __init__(self, _type, lexeme):

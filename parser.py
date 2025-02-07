@@ -97,6 +97,7 @@ class CallExpression:
 
     def __repr__(self):
         return f"{self.name}({','.join(map(lambda x: x.to_string(), self.arguments))})"
+    9
 
     def to_string(self):
         return f"{self.name}({','.join(map(lambda x: x.to_string(), self.arguments))})"
@@ -179,6 +180,17 @@ class FunctionDeclarationStatement:
     def to_string(self):
         return f"@{self.name}({','.join(self.arguments)})"
 
+class ReturnStatement:
+    def __init__(self, expr):
+        self.expr = expr
+        self.statement_type = "RETURN_STATEMENT"
+
+    def __repr__(self):
+        return f"return {self.expr}"
+
+    def to_string(self):
+        return f"return {self.expr}"
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -241,6 +253,13 @@ class Parser:
                     incrementor = self.expression()
                     loop_block = self.expression()
                     return ForStatement(initializer, condition, incrementor, loop_block)
+                
+                case "return":
+                    self.consume("KEYWORD")
+                    ret = self.expression()
+                    self.consume("SEMI_COLON")
+                    r = ReturnStatement(ret)
+                    return r
                 
         
         elif self.tokens[self.current_index].type == "FUNCTION_INITIALIZER":
@@ -336,8 +355,9 @@ class Parser:
 
     def unary(self):
         if self.match_tokens(["NOT", "MINUS"]):
+            operator = self.tokens[self.current_index - 1]
             unary_expr = self.unary()
-            return UnaryExpression(self.tokens[self.current_index - 1], unary_expr)
+            return UnaryExpression(operator, unary_expr)
         else:
             return self.call()
 
