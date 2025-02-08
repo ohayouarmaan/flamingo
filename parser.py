@@ -77,6 +77,18 @@ class VarDeclarationExpression:
         return f"{self.name} = {self.expr}"
 
 
+class GetExpression:
+    def __init__(self, name, obj):
+        self.name = name
+        self.obj = obj
+        self.expr_type = "GET_EXPRESSION"
+
+    def __repr__(self):
+        return f"{self.obj}.{self.name}"
+
+    def to_string(self):
+        return f"{self.obj}.{self.name}"
+
 class VarUpdateExpression:
     def __init__(self, name, expr):
         self.name = name
@@ -462,6 +474,10 @@ class Parser:
                     continue
 
             primary = CallExpression(primary, arguments)
+        while self.match_tokens("DOT"):
+            ident = self.tokens[self.current_index]
+            self.consume("WORD")
+            primary = GetExpression(ident, primary)
         return primary
 
     def primary(self):

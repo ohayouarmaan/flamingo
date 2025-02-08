@@ -2,10 +2,12 @@ var n = 10;
 
 struct Person {
   age: int,
-  name: string
+  name: string,
+  father: Person
 }
 
-var x = #Person{ age: 5, name: "somehting" };
+var father = #Person{ age: 32, name: "Something's dad", father: nil };
+var x = #Person{ age: 5, name: "somehting", father: father };
 
 @fibonacci(current, next, count) {
   if count {
@@ -16,11 +18,6 @@ var x = #Person{ age: 5, name: "somehting" };
   }
 }
 
-var start = if n > 0 {
-  fibonacci(0, 1, n);
-} else {
-  print "Invalid input";
-};
 
-print x;
+print "father's father age is " + x.father.age;
 

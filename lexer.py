@@ -52,7 +52,8 @@ class Lexer:
                 else:
                     if lexeme == "nil":
                         self.tokens.append(Token("NIL", lexeme))
-                    self.tokens.append(Token("WORD", lexeme))
+                    else:
+                        self.tokens.append(Token("WORD", lexeme))
                 break
 
             first_letter = self.advance()

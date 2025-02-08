@@ -86,6 +86,9 @@ class Interpreter:
             case "STRUCT_INIT_EXPRESSION":
                 return self.visit_struct_init_expression(expr)
 
+            case "GET_EXPRESSION":
+                return self.visit_get_expression(expr)
+
     def visit_binary(self, expr):
         if expr.operator.type == "PLUS":
             lhs = self.eval_expr(expr.left)
@@ -240,4 +243,11 @@ class Interpreter:
             values.append(StructItem(def_val.name, self.eval_expr(expr.values[def_val.name])))
 
         return StructType(values)
+
+    
+    def visit_get_expression(self, expr):
+        t = self.eval_expr(expr.obj).values
+        for e in t:
+            if e.name == expr.name.to_string():
+                return e.value
 
