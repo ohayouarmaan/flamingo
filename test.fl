@@ -1,10 +1,26 @@
-var i = 4;
+var n = 10;
 
-@function(something) {
-  print something;
-  return -5;
+struct Person {
+  age: int,
+  name: string
 }
 
-for var j = 0, j < 4, j = (j + 2) {
-  print function(j);
+var x = #Person{ age: 5, name: "somehting" };
+
+@fibonacci(current, next, count) {
+  if count {
+    print current;
+    fibonacci(next, current + next, count - 1);
+  } else {
+    return 0;
+  }
 }
+
+var start = if n > 0 {
+  fibonacci(0, 1, n);
+} else {
+  print "Invalid input";
+};
+
+print x;
+

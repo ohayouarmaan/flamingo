@@ -2,6 +2,7 @@ import storage
 from callable import Callable
 from standard.time import Time
 from standard.user_defined import UserDefined, ReturnException
+from standard_types.struct import StructItem, StructType
 
 class Interpreter:
     def __init__(self, program):
@@ -51,6 +52,10 @@ class Interpreter:
             case "RETURN_STATEMENT":
                 raise ReturnException(self.eval_expr(statement.expr))
 
+            case "STRUCT_DECLARATION_STATEMENT":
+                self.global_storage.add_value(statement.values, statement.name)
+                return None
+
 
     def eval_expr(self, expr):
         match expr.expr_type:
@@ -77,6 +82,9 @@ class Interpreter:
 
             case "CALL_EXPRESSION":
                 return self.visit_call_expression(expr)
+            
+            case "STRUCT_INIT_EXPRESSION":
+                return self.visit_struct_init_expression(expr)
 
     def visit_binary(self, expr):
         if expr.operator.type == "PLUS":
@@ -225,4 +233,11 @@ class Interpreter:
 
         return value.call(self, arguments)
     
+    def visit_struct_init_expression(self, expr):
+        struct_def = self.global_storage.get_value(expr.name)
+        values = []
+        for def_val in struct_def:
+            values.append(StructItem(def_val.name, self.eval_expr(expr.values[def_val.name])))
+
+        return StructType(values)
 

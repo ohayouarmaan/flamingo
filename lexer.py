@@ -15,7 +15,7 @@ DELIMITERS = [" ", "\t", "\n", ""]
 LETTERS = string.ascii_letters + "_"
 NUMBERS = [f"{x}" for x in range(0, 10)]
 NUMBERS.append(".")
-KEYWORDS = ["print", "for", "while", "if", "else", "var", "return"]
+KEYWORDS = ["print", "for", "while", "if", "else", "var", "return", "struct"]
 
 class Token:
     def __init__(self, _type, lexeme):
@@ -113,6 +113,8 @@ class Lexer:
                 self.tokens.append(Token("MODULUS", current_character))
             elif current_character in [" ", "\t", "\n"]:
                 pass
+            elif current_character == "#":
+                self.tokens.append(Token("HASH", current_character))
             elif current_character == "-":
                 self.tokens.append(Token("MINUS", current_character))
             elif current_character == ">":

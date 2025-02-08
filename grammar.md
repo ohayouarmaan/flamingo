@@ -14,9 +14,14 @@ primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")" | identifier ;
 
 PROGRAM        -> declaration* EOF ;
-declaration    -> statement ;
+declaration    -> functionDeclarationStatement |
+                  structDeclarationStatement |
+                  statement ;
 statement      -> exprStatement |
                   printStatement ;
+
+structDeclarationStatement -> "struct" identifier "{" (field ":" fieldType ",")* "}" ;
+functionDeclarationStatement -> "@" identifier "(" (arguments ",")* ")" block ;
 printStatement -> "print" expression ";" ;
 returnStatement -> "return" expression ";" ;
 exprStatement  -> expression ";" ;
