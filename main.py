@@ -10,8 +10,8 @@ with open("./test.fl", "r") as f:
 
 
 l.lex()
+# print(l.tokens)
 p = parser.Parser(l.tokens)
-
 e = p.parse()
 # print(e)
 inter = interpreter.Interpreter(e)

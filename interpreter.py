@@ -1,7 +1,9 @@
 import storage
 from callable import Callable
+from parser import SetExpression
 from standard.time import Time
 from standard.user_defined import UserDefined, ReturnException
+from standard_types.struct import StructItem, StructType
 
 class Interpreter:
     def __init__(self, program):
@@ -28,7 +30,10 @@ class Interpreter:
 
             case "VAR_UPDATE_STATEMENT":
                 value = self.eval_expr(statement.expr)
-                self.current_storage.update_value(value, statement.name)
+                if isinstance(statement.name, SetExpression):
+                    self.visit_set_expression(statement.name, statement.expr)
+                else:
+                    self.current_storage.update_value(value, statement.name)
                 return None
 
             case "FOR_LOOP_STATEMENT":
@@ -50,6 +55,10 @@ class Interpreter:
                 return None
             case "RETURN_STATEMENT":
                 raise ReturnException(self.eval_expr(statement.expr))
+
+            case "STRUCT_DECLARATION_STATEMENT":
+                self.global_storage.add_value(statement.values, statement.name)
+                return None
 
 
     def eval_expr(self, expr):
@@ -77,6 +86,12 @@ class Interpreter:
 
             case "CALL_EXPRESSION":
                 return self.visit_call_expression(expr)
+            
+            case "STRUCT_INIT_EXPRESSION":
+                return self.visit_struct_init_expression(expr)
+
+            case "GET_EXPRESSION":
+                return self.visit_get_expression(expr)
 
     def visit_binary(self, expr):
         if expr.operator.type == "PLUS":
@@ -145,8 +160,6 @@ class Interpreter:
         elif expr.operator.type == "EQ_EQ":
             lhs = self.eval_expr(expr.left)
             rhs = self.eval_expr(expr.right)
-            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
-                raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
             return lhs == rhs
 
         elif expr.operator.type == "NOT_EQ":
@@ -160,6 +173,12 @@ class Interpreter:
             return not self.eval_expr(expr.value)
         elif expr.operator.lexeme == "-":
             return -self.eval_expr(expr.value)
+
+    
+    def visit_set_expression(self, name, obj):
+        for val in self.eval_expr(name.obj).values:
+            if val.name == name.name.to_string():
+                val.set(self.eval_expr(obj))
 
     def visit_literal(self, expr):
         if expr.type == "NUMBER":
@@ -225,4 +244,18 @@ class Interpreter:
 
         return value.call(self, arguments)
     
+    def visit_struct_init_expression(self, expr):
+        struct_def = self.global_storage.get_value(expr.name)
+        values = []
+        for def_val in struct_def:
+            values.append(StructItem(def_val.name, self.eval_expr(expr.values[def_val.name])))
+
+        return StructType(values)
+
+    
+    def visit_get_expression(self, expr):
+        t = self.eval_expr(expr.obj).values
+        for e in t:
+            if e.name == expr.name.to_string():
+                return e.value
 

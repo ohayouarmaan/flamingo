@@ -77,6 +77,30 @@ class VarDeclarationExpression:
         return f"{self.name} = {self.expr}"
 
 
+class GetExpression:
+    def __init__(self, name, obj):
+        self.name = name
+        self.obj = obj
+        self.expr_type = "GET_EXPRESSION"
+
+    def __repr__(self):
+        return f"{self.obj}.{self.name}"
+
+    def to_string(self):
+        return f"{self.obj}.{self.name}"
+
+class SetExpression:
+    def __init__(self, name, obj):
+        self.name = name
+        self.obj = obj
+        self.expr_type = "SET_EXPRESSION"
+
+    def __repr__(self):
+        return f"{self.obj}.{self.name}"
+
+    def to_string(self):
+        return f"{self.obj}.{self.name}"
+
 class VarUpdateExpression:
     def __init__(self, name, expr):
         self.name = name
@@ -88,6 +112,18 @@ class VarUpdateExpression:
 
     def to_string(self):
         return f"{self.name} = {self.expr}"
+
+class StructInitializationExpression:
+    def __init__(self, name, values):
+        self.values = values
+        self.name = name
+        self.expr_type = "STRUCT_INIT_EXPRESSION"
+
+    def __repr__(self):
+        return f"{self.name}: {self.values}"
+
+    def to_string(self):
+        return f"{self.name}: {self.values}"
 
 class CallExpression:
     def __init__(self, name, arguments):
@@ -191,6 +227,29 @@ class ReturnStatement:
     def to_string(self):
         return f"return {self.expr}"
 
+class StructItem:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+    def __repr__(self):
+        return f"{self.name}: {self.value}"
+
+    def to_string(self):
+        return f"{self.name}: {self.value}"
+
+class StructDeclarationStatement:
+    def __init__(self, name, values):
+        self.name = name
+        self.values = values
+        self.statement_type = "STRUCT_DECLARATION_STATEMENT"
+
+    def __repr__(self):
+        return f"{self.name}: {self.values}"
+
+    def to_string(self):
+        return f"{self.name}: {self.values}"
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -260,6 +319,29 @@ class Parser:
                     self.consume("SEMI_COLON")
                     r = ReturnStatement(ret)
                     return r
+
+                case "struct":
+                    self.consume("KEYWORD")
+                    struct_name = self.tokens[self.current_index].lexeme
+                    self.consume("WORD")
+                    self.consume("LEFT_CURLY")
+                    struct_fields = []
+                    while not self.match_tokens("RIGHT_CURLY"):
+                        name = self.tokens[self.current_index].lexeme
+                        self.consume("WORD")
+                        self.consume("COLON")
+                        field_type = self.tokens[self.current_index].lexeme
+                        self.consume("WORD")
+                        struct_fields.append(StructItem(name, field_type))
+                        if self.tokens[self.current_index].type == "COMMA":
+                            self.consume("COMMA")
+                        else:
+                            if self.match_tokens("RIGHT_CURLY"):
+                                break
+                            else:
+                                raise Exception("Expected a '}' after this.")
+
+                    return StructDeclarationStatement(struct_name, struct_fields)
                 
         
         elif self.tokens[self.current_index].type == "FUNCTION_INITIALIZER":
@@ -278,9 +360,17 @@ class Parser:
             block = self.expression()
             return FunctionDeclarationStatement(function_name, arguments, block)
 
+        elif self.tokens[self.current_index].type == "HASH":
+            self.consume("HASH")
+
         elif self.tokens[self.current_index].type == "WORD":
-            name = self.tokens[self.current_index].lexeme
-            self.consume("WORD")
+            word = self.tokens[self.current_index].lexeme
+            name = self.call()
+            if isinstance(name, GetExpression):
+                name = SetExpression(name.name, name.obj)
+            else:
+                name = word
+            # self.consume("WORD")
             if self.match_tokens(["EQ"]):
                 expr = self.expression()
                 self.consume("SEMI_COLON")
@@ -338,6 +428,21 @@ class Parser:
                 return VarUpdateExpression(ident, expr)
             self.current_index -= 1
             return self.equality()
+        elif self.match_tokens(["HASH"]):
+            name = self.tokens[self.current_index].lexeme
+            self.consume("WORD")
+            self.consume("LEFT_CURLY")
+            values = {}
+            while not self.match_tokens("RIGHT_CURLY"):
+                item_name = self.tokens[self.current_index].lexeme
+                self.consume("WORD")
+                self.consume("COLON")
+                item_value = self.expression()
+                values[item_name] = item_value
+                if not self.match_tokens("COMMA"):
+                    self.consume("RIGHT_CURLY")
+                    break
+            return StructInitializationExpression(name, values)
 
         return self.equality()
 
@@ -361,6 +466,19 @@ class Parser:
         else:
             return self.call()
 
+    def init_struct(self):
+        name = self.tokens[self.current_index].lexeme
+        self.consume("WORD")
+        self.consume("LEFT_CURLY")
+        values = {}
+        while not self.match_tokens("RIGHT_CURLY"):
+            item_name = self.tokens[self.current_index].lexeme
+            self.consume("COLON")
+            item_value = self.expression()
+            values[item_name] = item_value
+            if not self.match_tokens("COMMA"):
+                self.consume("RIGHT_CURLY")
+                break
 
     def call(self):
         primary = self.primary()
@@ -373,6 +491,10 @@ class Parser:
                     continue
 
             primary = CallExpression(primary, arguments)
+        while self.match_tokens("DOT"):
+            ident = self.tokens[self.current_index]
+            self.consume("WORD")
+            primary = GetExpression(ident, primary)
         return primary
 
     def primary(self):
