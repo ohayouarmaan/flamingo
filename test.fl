@@ -1,23 +1,41 @@
-var n = 10;
-
-struct Person {
-  age: int,
-  name: string,
-  father: Person
+struct LinkedList {
+  value: int,
+  next: LinkedList
 }
 
-var father = #Person{ age: 32, name: "Something's dad", father: nil };
-var x = #Person{ age: 5, name: "somehting", father: father };
+@generate_linked_list(start) {
+  var firstElement = #LinkedList{
+    value: start,
+    next: nil
+  };
 
-@fibonacci(current, next, count) {
-  if count {
-    print current;
-    fibonacci(next, current + next, count - 1);
-  } else {
-    return 0;
+  var current = firstElement;
+
+  for var i = start - 1, i >= 0, i=i-1 {
+    var test = #LinkedList {
+      value: i,
+      next: nil
+    };
+    current.next = test;
+    current = test;
   }
+  
+  return firstElement;
 }
 
+@reverse_linked_list(node, prev) {
+  if node == nil {
+    return prev;
+  }
 
-print "father's father age is " + x.father.age;
+  var nextNode = node.next;
+  node.next = prev;
 
+  return reverse_linked_list(nextNode, node);
+}
+
+@reverse(head) {
+  return reverse_linked_list(head, nil);
+}
+
+print reverse(generate_linked_list(4));

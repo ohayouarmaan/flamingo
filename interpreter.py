@@ -1,5 +1,6 @@
 import storage
 from callable import Callable
+from parser import SetExpression
 from standard.time import Time
 from standard.user_defined import UserDefined, ReturnException
 from standard_types.struct import StructItem, StructType
@@ -29,7 +30,10 @@ class Interpreter:
 
             case "VAR_UPDATE_STATEMENT":
                 value = self.eval_expr(statement.expr)
-                self.current_storage.update_value(value, statement.name)
+                if isinstance(statement.name, SetExpression):
+                    self.visit_set_expression(statement.name, statement.expr)
+                else:
+                    self.current_storage.update_value(value, statement.name)
                 return None
 
             case "FOR_LOOP_STATEMENT":
@@ -156,8 +160,6 @@ class Interpreter:
         elif expr.operator.type == "EQ_EQ":
             lhs = self.eval_expr(expr.left)
             rhs = self.eval_expr(expr.right)
-            if not (isinstance(lhs, float) or isinstance(lhs, int)) or not (isinstance(rhs, float) or isinstance(rhs, int)):
-                raise Exception("Expected LHS and RHS of a Divide Expression to be a number.")
             return lhs == rhs
 
         elif expr.operator.type == "NOT_EQ":
@@ -171,6 +173,12 @@ class Interpreter:
             return not self.eval_expr(expr.value)
         elif expr.operator.lexeme == "-":
             return -self.eval_expr(expr.value)
+
+    
+    def visit_set_expression(self, name, obj):
+        for val in self.eval_expr(name.obj).values:
+            if val.name == name.name.to_string():
+                val.set(self.eval_expr(obj))
 
     def visit_literal(self, expr):
         if expr.type == "NUMBER":

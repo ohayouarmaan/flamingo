@@ -89,6 +89,18 @@ class GetExpression:
     def to_string(self):
         return f"{self.obj}.{self.name}"
 
+class SetExpression:
+    def __init__(self, name, obj):
+        self.name = name
+        self.obj = obj
+        self.expr_type = "SET_EXPRESSION"
+
+    def __repr__(self):
+        return f"{self.obj}.{self.name}"
+
+    def to_string(self):
+        return f"{self.obj}.{self.name}"
+
 class VarUpdateExpression:
     def __init__(self, name, expr):
         self.name = name
@@ -352,8 +364,13 @@ class Parser:
             self.consume("HASH")
 
         elif self.tokens[self.current_index].type == "WORD":
-            name = self.tokens[self.current_index].lexeme
-            self.consume("WORD")
+            word = self.tokens[self.current_index].lexeme
+            name = self.call()
+            if isinstance(name, GetExpression):
+                name = SetExpression(name.name, name.obj)
+            else:
+                name = word
+            # self.consume("WORD")
             if self.match_tokens(["EQ"]):
                 expr = self.expression()
                 self.consume("SEMI_COLON")

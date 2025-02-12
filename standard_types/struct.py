@@ -9,6 +9,9 @@ class StructItem:
     def to_string(self):
         return f"{self.name}: {self.value}"
 
+    def set(self, value):
+        self.value = value
+
 class StructType:
     def __init__(self, values):
         self.values = values
