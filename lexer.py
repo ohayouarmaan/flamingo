@@ -15,8 +15,7 @@ DELIMITERS = [" ", "\t", "\n", ""]
 LETTERS = string.ascii_letters + "_"
 NUMBERS = [f"{x}" for x in range(0, 10)]
 NUMBERS.append(".")
-KEYWORDS = ["print", "for", "while", "if", "else", "var", "return", "struct"]
-
+KEYWORDS = ["print", "for", "while", "if", "else", "var", "return", "struct", "import", "as"]
 class Token:
     def __init__(self, _type, lexeme):
         self.type = _type
@@ -111,7 +110,11 @@ class Lexer:
             elif current_character == "*":
                 self.tokens.append(Token("MULTIPLY", current_character))
             elif current_character == "%":
-                self.tokens.append(Token("MODULUS", current_character))
+                if self.peek() == "%":
+                    self.advance()
+                    self.tokens.append(Token("MOD_MOD", current_character))
+                else:
+                    self.tokens.append(Token("MODULUS", current_character))
             elif current_character in [" ", "\t", "\n"]:
                 pass
             elif current_character == "#":

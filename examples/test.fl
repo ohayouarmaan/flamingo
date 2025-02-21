@@ -1,0 +1,5 @@
+%%import "./something.fl" as something;
+
+var t = something.to_greet();
+t.b = 2;
+print something.to_greet();

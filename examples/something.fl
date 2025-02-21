@@ -1,0 +1,9 @@
+var x = 5;
+
+@to_greet() {
+  struct x {
+    b: str
+  }
+
+  return #x{b: "hello"};
+}

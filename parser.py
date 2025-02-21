@@ -133,7 +133,6 @@ class CallExpression:
 
     def __repr__(self):
         return f"{self.name}({','.join(map(lambda x: x.to_string(), self.arguments))})"
-    9
 
     def to_string(self):
         return f"{self.name}({','.join(map(lambda x: x.to_string(), self.arguments))})"
@@ -188,6 +187,18 @@ class ExpressionStatement:
 
     def to_string(self):
         return f"{self.expr}"
+
+class ImportStatement:
+    def __init__(self, path, module_name):
+        self.path = path
+        self.module_name = module_name
+        self.statement_type = "IMPORT_STATEMENT"
+
+    def __repr__(self):
+        return f"IMPORT {self.module_name}"
+
+    def to_string(self):
+        return f"IMPORT {self.module_name}"
 
 class ForStatement:
     def __init__(self, initializer, conditional, incrementor, block):
@@ -259,7 +270,7 @@ class Parser:
         return self.program()
 
     def match_tokens(self, tokens):
-        if self.tokens[self.current_index].type in tokens:
+        if self.tokens[self.current_index].type in tokens and self.current_index < len(self.tokens):
             self.current_index += 1
             return True
         return False
@@ -366,10 +377,14 @@ class Parser:
         elif self.tokens[self.current_index].type == "WORD":
             word = self.tokens[self.current_index].lexeme
             name = self.call()
-            if isinstance(name, GetExpression):
+            if isinstance(name, GetExpression) and self.peek()[0] == "EQ":
                 name = SetExpression(name.name, name.obj)
+            elif isinstance(name, GetExpression) and self.peek()[0] == "SEMI_COLON":
+                self.consume("SEMI_COLON")
+                return ExpressionStatement(name)
             else:
                 name = word
+
             # self.consume("WORD")
             if self.match_tokens(["EQ"]):
                 expr = self.expression()
@@ -377,15 +392,46 @@ class Parser:
                 return VarUpdateStatement(name, expr)
             else:
                 self.current_index -= 1
+                if self.peek()[0] == "RIGHT_BRACKET":
+                    while self.peek()[0] != "LEFT_BRACKET":
+                        self.current_index -= 1
+                    self.current_index -= 1
                 expr = self.expression()
                 self.consume("SEMI_COLON")
                 return ExpressionStatement(expr)
 
+        elif self.tokens[self.current_index].type == "MOD_MOD":
+            self.consume("MOD_MOD")
+            if self.match_tokens(["KEYWORD"]):
+                to_do_kw = self.tokens[self.current_index - 1]
+                if to_do_kw.lexeme == "import":
+                    path = self.expression()
+                    if path.expr_type != "LITERAL_EXPRESSION" and path.type != "STRING":
+                        raise Exception(f"Expected a path instead got a {path.type}")
+                    
+                    if self.tokens[self.current_index].lexeme != "as":
+                        raise Exception(f"Expected 'as' Keyword after an import statement")
+
+                    self.consume("KEYWORD")
+
+                    mod_name = self.tokens[self.current_index]
+                    if mod_name.type != "WORD":
+                        raise Exception("Error expected a word after 'as'")
+
+                    self.consume("WORD")
+                    self.consume("SEMI_COLON")
+
+                    return ImportStatement(path, mod_name)
+
+            
         else:
             expr = self.expression()
             self.consume("SEMI_COLON")
             return ExpressionStatement(expr)
 
+
+    def peek(self):
+        return (self.tokens[self.current_index].type, self.tokens[self.current_index])
 
     def create_binary_expression(self, precedent_fn, match_tokens):
         lhs = precedent_fn()
@@ -427,7 +473,8 @@ class Parser:
                 expr = self.expression()
                 return VarUpdateExpression(ident, expr)
             self.current_index -= 1
-            return self.equality()
+            e = self.equality()
+            return e
         elif self.match_tokens(["HASH"]):
             name = self.tokens[self.current_index].lexeme
             self.consume("WORD")
@@ -482,19 +529,21 @@ class Parser:
 
     def call(self):
         primary = self.primary()
-        while self.match_tokens("LEFT_BRACKET"):
-            arguments = []
-            while not self.match_tokens("RIGHT_BRACKET"):
-                current_argument = self.expression()
-                arguments.append(current_argument)
-                if self.match_tokens("COMMA"):
-                    continue
-
-            primary = CallExpression(primary, arguments)
-        while self.match_tokens("DOT"):
-            ident = self.tokens[self.current_index]
-            self.consume("WORD")
-            primary = GetExpression(ident, primary)
+        while True:
+            if self.match_tokens("LEFT_BRACKET"):
+                arguments = []
+                while not self.match_tokens("RIGHT_BRACKET"):
+                    current_argument = self.expression()
+                    arguments.append(current_argument)
+                    if self.match_tokens("COMMA"):
+                        continue
+                primary = CallExpression(primary, arguments)
+            elif self.match_tokens("DOT"):
+                ident = self.tokens[self.current_index].lexeme
+                self.current_index += 1
+                primary = GetExpression(ident, primary)
+            else:
+                break
         return primary
 
     def primary(self):
