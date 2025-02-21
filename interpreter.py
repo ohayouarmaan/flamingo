@@ -1,16 +1,23 @@
 import storage
+import os
 from callable import Callable
-from parser import SetExpression
+from parser import SetExpression, Parser
+from lexer import Lexer
 from standard.time import Time
 from standard.user_defined import UserDefined, ReturnException
 from standard_types.struct import StructItem, StructType
+from standard_types.modules import FlamingoModuleItem, FlamingoModuleType
 
 class Interpreter:
-    def __init__(self, program):
+    def __init__(self, program, _storage, cwd="."):
         self.program = program 
-        self.global_storage = storage.Storage(None)
-        self.global_storage.add_value(Time(), "time")
+        if _storage:
+            self.global_storage = _storage
+        else:
+            self.global_storage = storage.Storage(None)
+            self.global_storage.add_value(Time(), "time")
         self.current_storage = self.global_storage
+        self.cwd = cwd
 
     def interpret(self):
         for i in range(len(self.program)):
@@ -59,6 +66,24 @@ class Interpreter:
             case "STRUCT_DECLARATION_STATEMENT":
                 self.global_storage.add_value(statement.values, statement.name)
                 return None
+            case "IMPORT_STATEMENT":
+                with open(os.path.join(self.cwd, self.eval_expr(statement.path)), "r") as f:
+                    content = f.read()
+                    l = Lexer(content)
+                    l.lex()
+                    p = Parser(l.tokens)
+                    e = p.parse()
+                    new_module_storage = storage.Storage(None)
+                    i = Interpreter(e, new_module_storage)
+                    i.interpret()
+
+                    module_key_values = []
+
+                    for _, (key, value) in enumerate(new_module_storage.storage.items()):
+                        module_key_values.append(FlamingoModuleItem(key, value))
+
+                    self.current_storage.add_value(FlamingoModuleType(module_key_values), statement.module_name.lexeme)
+
 
 
     def eval_expr(self, expr):
@@ -177,7 +202,7 @@ class Interpreter:
     
     def visit_set_expression(self, name, obj):
         for val in self.eval_expr(name.obj).values:
-            if val.name == name.name.to_string():
+            if val.name == name.name:
                 val.set(self.eval_expr(obj))
 
     def visit_literal(self, expr):
@@ -256,6 +281,7 @@ class Interpreter:
     def visit_get_expression(self, expr):
         t = self.eval_expr(expr.obj).values
         for e in t:
-            if e.name == expr.name.to_string():
+            if e.name == expr.name:
                 return e.value
+
 
