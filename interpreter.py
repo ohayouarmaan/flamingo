@@ -270,7 +270,7 @@ class Interpreter:
         return value.call(self, arguments)
     
     def visit_struct_init_expression(self, expr):
-        struct_def = self.global_storage.get_value(expr.name)
+        struct_def = self.eval_expr(expr.name)
         values = []
         for def_val in struct_def:
             values.append(StructItem(def_val.name, self.eval_expr(expr.values[def_val.name])))
@@ -283,5 +283,4 @@ class Interpreter:
         for e in t:
             if e.name == expr.name:
                 return e.value
-
 

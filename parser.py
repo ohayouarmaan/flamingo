@@ -476,8 +476,7 @@ class Parser:
             e = self.equality()
             return e
         elif self.match_tokens(["HASH"]):
-            name = self.tokens[self.current_index].lexeme
-            self.consume("WORD")
+            name = self.expression()
             self.consume("LEFT_CURLY")
             values = {}
             while not self.match_tokens("RIGHT_CURLY"):

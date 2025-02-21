@@ -20,6 +20,7 @@ declaration    → functionDeclarationStatement |
 statement      → exprStatement |
                   printStatement |
                   structDeclarationStatement |
+                  structInitStatement |
                   functionDeclarationStatement |
                   returnStatement |
                   importStatement;
@@ -30,8 +31,10 @@ printStatement               → "print" expression ";" ;
 returnStatement              → "return" expression ";" ;
 exprStatement                → expression ";" ;
 importStatement              → "%%" "import" path "as" MODULE_NAME
+structInitStatement          → "#" structName "{" (field ":" value ",")* "}" ;
 
 ifExpression                 → 'if' expression <block> (else statement)? ;
+forStatement                 → "for" expression "," expression "," expression BlockStatement ;
 block                        → '{' (statement ';')* '}' ;
 arguments                    → expression ( "," expression )* ;
 ```

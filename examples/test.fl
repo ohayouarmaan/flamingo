@@ -2,4 +2,10 @@
 
 var t = something.to_greet();
 t.b = 2;
-print something.to_greet();
+
+var fucker = #something.Person {
+  name: "Armaan Gupta",
+  age: 20
+};
+
+print "My age: " + fucker.age;

@@ -1,5 +1,10 @@
 var x = 5;
 
+struct Person {
+  name: str,
+  age: int
+}
+
 @to_greet() {
   struct x {
     b: str
