@@ -1,4 +1,4 @@
-%%import "./something.fl" as something;
+%%import "./examples/something.fl" as something;
 
 var t = something.to_greet();
 t.b = 2;
